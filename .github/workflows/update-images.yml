@@ -1,0 +1,42 @@
+name: Update image list
+
+on:
+  push:
+    paths:
+      - 'images/**'
+
+jobs:
+  update-json:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Generate images.json
+        run: |
+          echo "[" > images.json
+          first=true
+          for dir in images/*/; do
+            [ -d "$dir" ] || continue
+            cat=$(basename "$dir")
+            for file in "$dir"*.{jpg,jpeg,png,gif,webp,JPG,JPEG,PNG,GIF,WEBP}; do
+              [ -f "$file" ] || continue
+              if [ "$first" = true ]; then
+                first=false
+              else
+                echo "," >> images.json
+              fi
+              echo "  {\"src\": \"$file\", \"cat\": \"$cat\"}" >> images.json
+            done
+          done
+          echo "" >> images.json
+          echo "]" >> images.json
+
+      - name: Commit images.json
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add images.json
+          git diff --cached --quiet || git commit -m "Update images.json"
+          git push
