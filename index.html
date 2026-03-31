@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gallery</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Zen+Kaku+Gothic+New:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #ffffff;
+  --surface: #f5f5f5;
+  --text: #222222;
+  --text-dim: #999999;
+  --text-light: #bbbbbb;
+  --accent: #222222;
+  --border: #eeeeee;
+  --radius: 6px;
+  --font-body: 'Zen Kaku Gothic New', 'DM Sans', sans-serif;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: var(--font-body);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+.header {
+  padding: 2.5rem 2rem 1.5rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+.header h1 {
+  font-size: 1.25rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+.cat-nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(255,255,255,0.95);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  padding: 0.7rem 1rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.cat-nav::-webkit-scrollbar { display: none; }
+.cat-nav-inner {
+  display: flex;
+  gap: 0.3rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  flex-wrap: wrap;
+}
+.cat-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-dim);
+  padding: 0.35rem 0.75rem;
+  border-radius: 100px;
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+.cat-btn:hover { color: var(--text); background: var(--surface); }
+.cat-btn.active { background: var(--accent); color: #fff; font-weight: 500; }
+.gallery-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1.5rem 1.5rem 4rem;
+}
+.category-section { margin-bottom: 2.5rem; }
+.category-section.hidden { display: none; }
+.category-title {
+  font-size: 0.95rem;
+  font-weight: 500;
+  margin-bottom: 0.8rem;
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+.category-count { font-size: 0.72rem; color: var(--text-light); font-weight: 400; }
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 0.6rem;
+}
+.grid-item {
+  position: relative;
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--surface);
+  aspect-ratio: 1;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+.grid-item:hover { opacity: 0.85; }
+.grid-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.empty-msg {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 2.5rem 1rem;
+  color: var(--text-light);
+  font-size: 0.82rem;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+}
+.lightbox {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(255,255,255,0.96);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  cursor: zoom-out;
+}
+.lightbox.open { display: flex; }
+.lightbox img {
+  max-width: 90vw;
+  max-height: 85vh;
+  object-fit: contain;
+  border-radius: var(--radius);
+  box-shadow: 0 4px 30px rgba(0,0,0,0.08);
+}
+.lightbox-close {
+  position: absolute; top: 1.2rem; right: 1.2rem;
+  background: none; border: none; color: var(--text-dim);
+  font-size: 1.5rem; cursor: pointer;
+  width: 40px; height: 40px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 50%; transition: all 0.2s;
+}
+.lightbox-close:hover { color: var(--text); background: var(--surface); }
+.lightbox-nav {
+  position: absolute; top: 50%; transform: translateY(-50%);
+  background: var(--surface); border: none; color: var(--text);
+  font-size: 1.2rem; cursor: pointer;
+  width: 40px; height: 40px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.2s;
+}
+.lightbox-nav:hover { background: var(--border); }
+.lightbox-prev { left: 1rem; }
+.lightbox-next { right: 1rem; }
+@media (max-width: 600px) {
+  .header { padding: 1.8rem 1rem 1rem; }
+  .grid { grid-template-columns: repeat(2, 1fr); gap: 0.4rem; }
+  .cat-nav-inner { flex-wrap: nowrap; }
+  .gallery-container { padding: 1rem 0.6rem 3rem; }
+  .lightbox-nav { width: 34px; height: 34px; font-size: 1rem; }
+}
+</style>
+</head>
+<body>
+<header class="header"><h1>Gallery</h1></header>
+<nav class="cat-nav"><div class="cat-nav-inner" id="catNav"></div></nav>
+<main class="gallery-container" id="gallery"></main>
+<div class="lightbox" id="lightbox">
+  <button class="lightbox-close" aria-label="閉じる">&times;</button>
+  <button class="lightbox-nav lightbox-prev" aria-label="前へ">&#8249;</button>
+  <button class="lightbox-nav lightbox-next" aria-label="次へ">&#8250;</button>
+  <img src="" alt="" id="lightboxImg">
+</div>
+<script>
+// ============================================================
+//  ★★★ 画像の追加方法 ★★★
+//
+//  1. images/ フォルダに画像ファイルを入れる
+//  2. 下の galleryData にエントリを追加する
+//
+//  例：{ src: "images/kitchen-01.jpg", cat: "キッチン" },
+//
+//  ※ cat の値はカテゴリ名と完全一致させてください
+// ============================================================
+
+const galleryData = [
+  // { src: "images/wall-01.jpg", cat: "壁掛け家具" },
+  // { src: "images/other-01.jpg", cat: "その他" },
+  // { src: "images/kitchen-01.jpg", cat: "キッチン" },
+  // { src: "images/pc-01.jpg", cat: "PC" },
+  // { src: "images/screen-01.jpg", cat: "スクリーン" },
+  // { src: "images/game-01.jpg", cat: "ゲーム" },
+  // { src: "images/print-01.jpg", cat: "印刷物" },
+  // { src: "images/art-01.jpg", cat: "アート（額縁/キャンバス）" },
+  // { src: "images/media-01.jpg", cat: "メディア" },
+  // { src: "images/photo-01.jpg", cat: "フォト" },
+  // { src: "images/book-01.jpg", cat: "本" },
+  // { src: "images/goods-01.jpg", cat: "グッズ" },
+  // { src: "images/stationery-01.jpg", cat: "文房具" },
+  // { src: "images/sports-01.jpg", cat: "スポーツ" },
+  // { src: "images/drink-01.jpg", cat: "ドリンク" },
+];
+
+const categories = [
+  "壁掛け家具","その他","キッチン","PC","スクリーン",
+  "ゲーム","印刷物","アート（額縁/キャンバス）","メディア",
+  "フォト","本","グッズ","文房具","スポーツ","ドリンク"
+];
+
+const catNav = document.getElementById('catNav');
+const allBtn = document.createElement('button');
+allBtn.className = 'cat-btn active';
+allBtn.textContent = 'すべて';
+allBtn.addEventListener('click', () => filterCategory(null));
+catNav.appendChild(allBtn);
+categories.forEach(cat => {
+  const btn = document.createElement('button');
+  btn.className = 'cat-btn';
+  btn.textContent = cat;
+  btn.addEventListener('click', () => filterCategory(cat));
+  catNav.appendChild(btn);
+});
+
+const galleryEl = document.getElementById('gallery');
+function buildGallery() {
+  galleryEl.innerHTML = '';
+  categories.forEach(cat => {
+    const items = galleryData.filter(d => d.cat === cat);
+    const section = document.createElement('section');
+    section.className = 'category-section';
+    section.dataset.cat = cat;
+    section.innerHTML = `
+      <h2 class="category-title">${cat}<span class="category-count">${items.length}</span></h2>
+      <div class="grid">
+        ${items.length > 0
+          ? items.map(item => `<div class="grid-item" data-src="${item.src}"><img src="${item.src}" alt="${cat}" loading="lazy"></div>`).join('')
+          : `<div class="empty-msg">まだ画像がありません</div>`}
+      </div>`;
+    galleryEl.appendChild(section);
+  });
+  document.querySelectorAll('.grid-item[data-src]').forEach(el => {
+    el.addEventListener('click', () => openLightbox(el.dataset.src));
+  });
+}
+buildGallery();
+
+let currentFilter = null;
+function filterCategory(cat) {
+  currentFilter = cat;
+  document.querySelectorAll('.cat-btn').forEach((btn, i) => {
+    if (cat === null && i === 0) btn.classList.add('active');
+    else if (btn.textContent === cat) btn.classList.add('active');
+    else btn.classList.remove('active');
+  });
+  document.querySelectorAll('.category-section').forEach(sec => {
+    sec.classList.toggle('hidden', cat !== null && sec.dataset.cat !== cat);
+  });
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+const lightbox = document.getElementById('lightbox');
+const lightboxImg = document.getElementById('lightboxImg');
+let currentLBIndex = 0;
+function getVisibleImages() {
+  return galleryData.filter(d => currentFilter === null || d.cat === currentFilter);
+}
+function openLightbox(src) {
+  const visible = getVisibleImages();
+  currentLBIndex = visible.findIndex(d => d.src === src);
+  lightboxImg.src = src;
+  lightbox.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeLightbox() {
+  lightbox.classList.remove('open');
+  document.body.style.overflow = '';
+}
+function navLightbox(dir) {
+  const visible = getVisibleImages();
+  if (!visible.length) return;
+  currentLBIndex = (currentLBIndex + dir + visible.length) % visible.length;
+  lightboxImg.src = visible[currentLBIndex].src;
+}
+lightbox.querySelector('.lightbox-close').addEventListener('click', closeLightbox);
+lightbox.querySelector('.lightbox-prev').addEventListener('click', e => { e.stopPropagation(); navLightbox(-1); });
+lightbox.querySelector('.lightbox-next').addEventListener('click', e => { e.stopPropagation(); navLightbox(1); });
+lightbox.addEventListener('click', e => { if (e.target === lightbox) closeLightbox(); });
+document.addEventListener('keydown', e => {
+  if (!lightbox.classList.contains('open')) return;
+  if (e.key === 'Escape') closeLightbox();
+  if (e.key === 'ArrowLeft') navLightbox(-1);
+  if (e.key === 'ArrowRight') navLightbox(1);
+});
+</script>
+<!--
+  画像追加手順:
+  1. images/ フォルダに画像アップロード
+  2. index.html の galleryData に1行追加:
+     { src: "images/ファイル名.jpg", cat: "カテゴリ名" },
+  3. Commit changes → 数分で反映
+-->
+</body>
+</html>
