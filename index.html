@@ -112,6 +112,12 @@ body {
   border: 1px dashed var(--border);
   border-radius: var(--radius);
 }
+.loading {
+  text-align: center;
+  padding: 4rem 1rem;
+  color: var(--text-dim);
+  font-size: 0.9rem;
+}
 .lightbox {
   display: none;
   position: fixed;
@@ -165,7 +171,9 @@ body {
 <body>
 <header class="header"><h1>Gallery</h1></header>
 <nav class="cat-nav"><div class="cat-nav-inner" id="catNav"></div></nav>
-<main class="gallery-container" id="gallery"></main>
+<main class="gallery-container" id="gallery">
+  <div class="loading">読み込み中...</div>
+</main>
 <div class="lightbox" id="lightbox">
   <button class="lightbox-close" aria-label="閉じる">&times;</button>
   <button class="lightbox-nav lightbox-prev" aria-label="前へ">&#8249;</button>
@@ -173,57 +181,50 @@ body {
   <img src="" alt="" id="lightboxImg">
 </div>
 <script>
-// ============================================================
-//  ★★★ 画像の追加方法 ★★★
-//
-//  1. images/ フォルダに画像ファイルを入れる
-//  2. 下の galleryData にエントリを追加する
-//
-//  例：{ src: "images/kitchen-01.jpg", cat: "キッチン" },
-//
-//  ※ cat の値はカテゴリ名と完全一致させてください
-// ============================================================
-
-const galleryData = [
-  // { src: "images/wall-01.jpg", cat: "壁掛け家具" },
-  // { src: "images/other-01.jpg", cat: "その他" },
-  // { src: "images/kitchen-01.jpg", cat: "キッチン" },
-  // { src: "images/pc-01.jpg", cat: "PC" },
-  // { src: "images/screen-01.jpg", cat: "スクリーン" },
-  // { src: "images/game-01.jpg", cat: "ゲーム" },
-  // { src: "images/print-01.jpg", cat: "印刷物" },
-  // { src: "images/art-01.jpg", cat: "アート（額縁/キャンバス）" },
-  // { src: "images/media-01.jpg", cat: "メディア" },
-  // { src: "images/photo-01.jpg", cat: "フォト" },
-  // { src: "images/book-01.jpg", cat: "本" },
-  // { src: "images/goods-01.jpg", cat: "グッズ" },
-  // { src: "images/stationery-01.jpg", cat: "文房具" },
-  // { src: "images/sports-01.jpg", cat: "スポーツ" },
-  // { src: "images/drink-01.jpg", cat: "ドリンク" },
-];
-
+// カテゴリ順（この順番で表示されます）
 const categories = [
   "壁掛け家具","その他","キッチン","PC","スクリーン",
   "ゲーム","印刷物","アート（額縁/キャンバス）","メディア",
   "フォト","本","グッズ","文房具","スポーツ","ドリンク"
 ];
 
-const catNav = document.getElementById('catNav');
-const allBtn = document.createElement('button');
-allBtn.className = 'cat-btn active';
-allBtn.textContent = 'すべて';
-allBtn.addEventListener('click', () => filterCategory(null));
-catNav.appendChild(allBtn);
-categories.forEach(cat => {
-  const btn = document.createElement('button');
-  btn.className = 'cat-btn';
-  btn.textContent = cat;
-  btn.addEventListener('click', () => filterCategory(cat));
-  catNav.appendChild(btn);
-});
+let galleryData = [];
+let currentFilter = null;
 
-const galleryEl = document.getElementById('gallery');
+// images.json を読み込んでギャラリーを構築
+fetch('images.json?' + Date.now())
+  .then(r => r.json())
+  .then(data => {
+    galleryData = data;
+    buildNav();
+    buildGallery();
+  })
+  .catch(() => {
+    // images.json がまだない場合
+    galleryData = [];
+    buildNav();
+    buildGallery();
+  });
+
+function buildNav() {
+  const catNav = document.getElementById('catNav');
+  catNav.innerHTML = '';
+  const allBtn = document.createElement('button');
+  allBtn.className = 'cat-btn active';
+  allBtn.textContent = 'すべて';
+  allBtn.addEventListener('click', () => filterCategory(null));
+  catNav.appendChild(allBtn);
+  categories.forEach(cat => {
+    const btn = document.createElement('button');
+    btn.className = 'cat-btn';
+    btn.textContent = cat;
+    btn.addEventListener('click', () => filterCategory(cat));
+    catNav.appendChild(btn);
+  });
+}
+
 function buildGallery() {
+  const galleryEl = document.getElementById('gallery');
   galleryEl.innerHTML = '';
   categories.forEach(cat => {
     const items = galleryData.filter(d => d.cat === cat);
@@ -242,10 +243,10 @@ function buildGallery() {
   document.querySelectorAll('.grid-item[data-src]').forEach(el => {
     el.addEventListener('click', () => openLightbox(el.dataset.src));
   });
+  // フィルター状態を再適用
+  if (currentFilter) filterCategory(currentFilter);
 }
-buildGallery();
 
-let currentFilter = null;
 function filterCategory(cat) {
   currentFilter = cat;
   document.querySelectorAll('.cat-btn').forEach((btn, i) => {
@@ -259,6 +260,7 @@ function filterCategory(cat) {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
+// ライトボックス
 const lightbox = document.getElementById('lightbox');
 const lightboxImg = document.getElementById('lightboxImg');
 let currentLBIndex = 0;
@@ -293,12 +295,5 @@ document.addEventListener('keydown', e => {
   if (e.key === 'ArrowRight') navLightbox(1);
 });
 </script>
-<!--
-  画像追加手順:
-  1. images/ フォルダに画像アップロード
-  2. index.html の galleryData に1行追加:
-     { src: "images/ファイル名.jpg", cat: "カテゴリ名" },
-  3. Commit changes → 数分で反映
--->
 </body>
 </html>
