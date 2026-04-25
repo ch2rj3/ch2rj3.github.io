@@ -1,4 +1,32 @@
 [
   {"src": "images/キッチン/vender.jpg", "cat": "キッチン"}
+,
+  {"src": "images/本/Book_03.jpg", "cat": "本"}
+,
+  {"src": "images/本/Book_04.jpg", "cat": "本"}
+,
+  {"src": "images/本/Book_06.jpg", "cat": "本"}
+,
+  {"src": "images/本/Book_07.jpg", "cat": "本"}
+,
+  {"src": "images/本/Book_08.jpg", "cat": "本"}
+,
+  {"src": "images/本/Book_09.jpg", "cat": "本"}
+,
+  {"src": "images/本/Book_10.jpg", "cat": "本"}
+,
+  {"src": "images/本/Book_11.jpg", "cat": "本"}
+,
+  {"src": "images/本/漫画01.jpg", "cat": "本"}
+,
+  {"src": "images/本/雑誌03.jpg", "cat": "本"}
+,
+  {"src": "images/本/雑誌04.jpg", "cat": "本"}
+,
+  {"src": "images/本/雑誌05.jpg", "cat": "本"}
+,
+  {"src": "images/本/雑誌06.jpg", "cat": "本"}
+,
+  {"src": "images/本/雑誌02.png", "cat": "本"}
 
 ]
