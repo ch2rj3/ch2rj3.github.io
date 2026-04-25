@@ -1,6 +1,14 @@
 [
   {"src": "images/キッチン/vender.jpg", "cat": "キッチン"}
 ,
+  {"src": "images/印刷物/Game01.jpg", "cat": "印刷物"}
+,
+  {"src": "images/印刷物/チラシ01.jpg", "cat": "印刷物"}
+,
+  {"src": "images/印刷物/チラシ02.jpg", "cat": "印刷物"}
+,
+  {"src": "images/印刷物/チラシ03.jpg", "cat": "印刷物"}
+,
   {"src": "images/本/Book_03.jpg", "cat": "本"}
 ,
   {"src": "images/本/Book_04.jpg", "cat": "本"}
